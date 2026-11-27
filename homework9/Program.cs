@@ -1,61 +1,90 @@
 ﻿using System;
 
-namespace Task1_Cipher
+namespace Task2_Figures
 {
-    public interface ICipher
+    public abstract class Figure
     {
-        string Encode(string input);
-        string Decode(string input);
-    }
-    public class ACipher : ICipher
-    {
-        public string Encode(string input)
+        protected string Color { get; set; }
+        protected bool IsVisible { get; set; }
+        protected int X { get; set; }
+        protected int Y { get; set; }
+
+        public Figure(string color, bool isVisible, int x, int y)
         {
-            char[] chars = input.ToCharArray();
-            for (int i = 0; i < chars.Length; i++)
-            {
-                if (char.IsLetter(chars[i]))
-                {
-                    chars[i] = (char)(chars[i] + 1); 
-                }
-            }
-            return new string(chars);
+            Color = color;
+            IsVisible = isVisible;
+            X = x;
+            Y = y;
+        }
+        public void MoveHorizontal(int delta)
+        {
+            X += delta;
         }
 
-        public string Decode(string input)
+        public void MoveVertical(int delta)
         {
-            char[] chars = input.ToCharArray();
-            for (int i = 0; i < chars.Length; i++)
-            {
-                if (char.IsLetter(chars[i]))
-                {
-                    chars[i] = (char)(chars[i] - 1); 
-                }
-            }
-            return new string(chars);
+            Y += delta;
         }
-    }
-    public class BCipher : ICipher
-    {
-        public string Encode(string input)
+        public void ChangeColor(string newColor)
         {
-            char[] chars = input.ToCharArray();
-            for (int i = 0; i < chars.Length; i++)
-            {
-                if (char.IsLetter(chars[i]))
-                {
-                    if (char.IsUpper(chars[i]))
-                        chars[i] = (char)('Z' - (chars[i] - 'A'));
-                    else
-                        chars[i] = (char)('z' - (chars[i] - 'a'));
-                }
-            }
-            return new string(chars);
+            Color = newColor;
         }
 
-        public string Decode(string input)
+        public void ChangeVisibility(bool visible)
         {
-            return Encode(input);
+            IsVisible = visible;
+        }
+        public virtual void PrintState()
+        {
+            Console.WriteLine($"Тип: {GetType().Name} | Цвет: {Color} | Видимость: {(IsVisible ? "Да" : "Нет")} | Координаты: ({X}, {Y})");
+        }
+    }
+    public class Point : Figure
+    {
+        public Point(string color, bool isVisible, int x, int y) : base(color, isVisible, x, y) { }
+    }
+    public class Circle : Point
+    {
+        public double Radius { get; set; }
+
+        public Circle(string color, bool isVisible, int x, int y, double radius) 
+            : base(color, isVisible, x, y)
+        {
+            Radius = radius;
+        }
+
+        public double GetArea()
+        {
+            return Math.PI * Radius * Radius;
+        }
+
+        public override void PrintState()
+        {
+            base.PrintState();
+            Console.WriteLine($"   -> Радиус: {Radius} | Площадь: {GetArea():F2}");
+        }
+    }
+    public class Rectangle : Point
+    {
+        public double Width { get; set; }
+        public double Height { get; set; }
+
+        public Rectangle(string color, bool isVisible, int x, int y, double width, double height) 
+            : base(color, isVisible, x, y)
+        {
+            Width = width;
+            Height = height;
+        }
+
+        public double GetArea()
+        {
+            return Width * Height;
+        }
+
+        public override void PrintState()
+        {
+            base.PrintState();
+            Console.WriteLine($"   -> Ширина: {Width} | Высота: {Height} | Площадь: {GetArea():F2}");
         }
     }
 
@@ -63,24 +92,31 @@ namespace Task1_Cipher
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("=== Упражнение 10.1: Шифрование ===\n");
-            Console.Write("Введите строку для шифрования: ");
-            string text = Console.ReadLine();
+            Console.WriteLine("=== Домашнее задание 10.1: Геометрические фигуры ===\n");
+            Point point = new Point("Красный", true, 10, 20);
+            Circle circle = new Circle("Синий", true, 0, 0, 5.5);
+            Rectangle rect = new Rectangle("Зеленый", false, -5, 10, 4, 6);
 
-            ICipher cipherA = new ACipher();
-            ICipher cipherB = new BCipher();
+            Console.WriteLine("--- Исходное состояние ---");
+            point.PrintState();
+            circle.PrintState();
+            rect.PrintState();
 
-            Console.WriteLine($"\nОригинал: {text}");
+            Console.WriteLine("\n--- Выполняем действия (перемещение, смена цвета) ---");
+            point.MoveHorizontal(15);
+            point.ChangeColor("Желтый");
 
-            string encodedA = cipherA.Encode(text);
-            Console.WriteLine($"\n[ACipher]");
-            Console.WriteLine($"Зашифровано: {encodedA}");
-            Console.WriteLine($"Расшифровано: {cipherA.Decode(encodedA)}");
+            circle.MoveVertical(-10);
+            circle.ChangeVisibility(false);
 
-            string encodedB = cipherB.Encode(text);
-            Console.WriteLine($"\n[BCipher]");
-            Console.WriteLine($"Зашифровано: {encodedB}");
-            Console.WriteLine($"Расшифровано: {cipherB.Decode(encodedB)}");
+            rect.ChangeVisibility(true);
+            rect.MoveHorizontal(2);
+            rect.MoveVertical(2);
+
+            Console.WriteLine("\n--- Новое состояние ---");
+            point.PrintState();
+            circle.PrintState();
+            rect.PrintState();
 
             Console.ReadLine();
         }
