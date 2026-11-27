@@ -1,90 +1,62 @@
 ﻿using System;
 
-namespace Task2_Figures
+namespace Task3_Races
 {
-    public abstract class Figure
+    public abstract class Trial
     {
-        protected string Color { get; set; }
-        protected bool IsVisible { get; set; }
-        protected int X { get; set; }
-        protected int Y { get; set; }
-
-        public Figure(string color, bool isVisible, int x, int y)
-        {
-            Color = color;
-            IsVisible = isVisible;
-            X = x;
-            Y = y;
-        }
-        public void MoveHorizontal(int delta)
-        {
-            X += delta;
-        }
-
-        public void MoveVertical(int delta)
-        {
-            Y += delta;
-        }
-        public void ChangeColor(string newColor)
-        {
-            Color = newColor;
-        }
-
-        public void ChangeVisibility(bool visible)
-        {
-            IsVisible = visible;
-        }
-        public virtual void PrintState()
-        {
-            Console.WriteLine($"Тип: {GetType().Name} | Цвет: {Color} | Видимость: {(IsVisible ? "Да" : "Нет")} | Координаты: ({X}, {Y})");
-        }
+        public abstract string Name { get; }
+        public abstract void Play();
     }
-    public class Point : Figure
+    public class Beach : Trial
     {
-        public Point(string color, bool isVisible, int x, int y) : base(color, isVisible, x, y) { }
+        public override string Name => "Пляж";
+        public override void Play() => Console.WriteLine($"[{Name}] Команда проходит испытание на песке.");
     }
-    public class Circle : Point
+    public class Mousetrap : Trial
     {
-        public double Radius { get; set; }
-
-        public Circle(string color, bool isVisible, int x, int y, double radius) 
-            : base(color, isVisible, x, y)
-        {
-            Radius = radius;
-        }
-
-        public double GetArea()
-        {
-            return Math.PI * Radius * Radius;
-        }
-
-        public override void PrintState()
-        {
-            base.PrintState();
-            Console.WriteLine($"   -> Радиус: {Radius} | Площадь: {GetArea():F2}");
-        }
+        public override string Name => "Мышеловка";
+        public override void Play() => Console.WriteLine($"[{Name}] Команда преодолевает полосу препятствий.");
     }
-    public class Rectangle : Point
+    public class Sea : Trial
     {
-        public double Width { get; set; }
-        public double Height { get; set; }
+        public override string Name => "Море";
+        public override void Play() => Console.WriteLine($"[{Name}] Команда плывет на плотах.");
+    }
+    public class Fishing : Trial
+    {
+        public override string Name => "Рыбалка";
+        public override void Play() => Console.WriteLine($"[{Name}] Команда ловит рыбу с закрытыми глазами.");
+    }
+    public class Postmen : Trial
+    {
+        public override string Name => "Почтальоны";
+        public override void Play() => Console.WriteLine($"[{Name}] Команда разносит письма по адресам.");
+    }
+    public class Hill : Trial
+    {
+        public override string Name => "Горка";
+        public override void Play() => Console.WriteLine($"[{Name}] Команда скатывается с горы на скорость.");
+    }
+    public class NewCustomGame : Trial
+    {
+        public override string Name => "Собственная игра (Прыжки в мешках)";
+        public override void Play() => Console.WriteLine($"[{Name}] Команда прыгает в мешках до финиша.");
+    }
+    public class Team
+    {
+        public string Country { get; set; }
+        public int MembersCount { get; set; }
 
-        public Rectangle(string color, bool isVisible, int x, int y, double width, double height) 
-            : base(color, isVisible, x, y)
+        public Team(string country, int membersCount = 15)
         {
-            Width = width;
-            Height = height;
+            Country = country;
+            MembersCount = membersCount;
         }
 
-        public double GetArea()
+        public void PerformTrial(Trial trial)
         {
-            return Width * Height;
-        }
-
-        public override void PrintState()
-        {
-            base.PrintState();
-            Console.WriteLine($"   -> Ширина: {Width} | Высота: {Height} | Площадь: {GetArea():F2}");
+            Console.Write($"Команда {Country} (человек: {MembersCount}): ");
+            trial.Play();
         }
     }
 
@@ -92,33 +64,36 @@ namespace Task2_Figures
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("=== Домашнее задание 10.1: Геометрические фигуры ===\n");
-            Point point = new Point("Красный", true, 10, 20);
-            Circle circle = new Circle("Синий", true, 0, 0, 5.5);
-            Rectangle rect = new Rectangle("Зеленый", false, -5, 10, 4, 6);
+            Console.WriteLine("=== Большие гонки ===\n");
+            Team russia = new Team("Россия");
+            Team france = new Team("Франция");
+            Team china = new Team("Китай");
+            Team kazakhstan = new Team("Казахстан");
 
-            Console.WriteLine("--- Исходное состояние ---");
-            point.PrintState();
-            circle.PrintState();
-            rect.PrintState();
+            Team[] teams = { russia, france, china, kazakhstan };
+            Trial[] games = 
+            {
+                new Beach(),
+                new Mousetrap(),
+                new Sea(),
+                new Fishing(),
+                new Postmen(),
+                new Hill(),
+                new NewCustomGame() 
+            };
+            int gamesToPlay = 6; 
 
-            Console.WriteLine("\n--- Выполняем действия (перемещение, смена цвета) ---");
-            point.MoveHorizontal(15);
-            point.ChangeColor("Желтый");
+            for (int i = 0; i < gamesToPlay; i++)
+            {
+                Console.WriteLine($"\n--- Этап {i + 1}: {games[i].Name} ---");
+                foreach (var team in teams)
+                {
+                    team.PerformTrial(games[i]);
+                }
+            }
 
-            circle.MoveVertical(-10);
-            circle.ChangeVisibility(false);
-
-            rect.ChangeVisibility(true);
-            rect.MoveHorizontal(2);
-            rect.MoveVertical(2);
-
-            Console.WriteLine("\n--- Новое состояние ---");
-            point.PrintState();
-            circle.PrintState();
-            rect.PrintState();
-
+            Console.WriteLine("\nГонки завершены!");
             Console.ReadLine();
         }
     }
-}
+}}
